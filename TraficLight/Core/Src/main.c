@@ -25,6 +25,9 @@
 #include "scheduler.h"
 #include "button.h"
 #include "traffic_light.h"
+#include "global.h"
+#include "fsm_automatic.h"
+#include "fsm_manual.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -68,27 +71,9 @@ void Task_BlinkLED(void) {
     HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 }
 
-void Task_Traffic_Auto(void) {
-    static int sec = 0;
-
-    if (sec < 3) {
-        set_Traffic_1_Red();
-        set_Traffic_2_Green();
-    } else if (sec < 5) {
-        set_Traffic_1_Red();
-        set_Traffic_2_Yellow();
-    } else if (sec < 8) {
-        set_Traffic_1_Green();
-        set_Traffic_2_Red();
-    } else {
-        set_Traffic_1_Yellow();
-        set_Traffic_2_Red();
-    }
-
-    sec++;
-    if (sec >= 10) {
-        sec = 0;
-    }
+void Task_FSM(void) {
+    fsm_automatic_run();
+    fsm_manual_run();
 }
 /* USER CODE END 0 */
 
@@ -127,11 +112,11 @@ int main(void)
 
   SCH_Init();
 
-  SCH_Add_Task(Task_BlinkLED, 0, 100);
-  SCH_Add_Task(button_reading, 0, 1);
-  SCH_Add_Task(Task_Traffic_Auto, 0, 100);
+    SCH_Add_Task(Task_BlinkLED, 0, 100);
+    SCH_Add_Task(button_reading, 0, 1);
+    SCH_Add_Task(Task_FSM, 0, 100);
 
-  HAL_TIM_Base_Start_IT(&htim2);
+    HAL_TIM_Base_Start_IT(&htim2);
 
   /* USER CODE END 2 */
 
