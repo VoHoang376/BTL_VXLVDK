@@ -1,5 +1,6 @@
 #include "traffic_light.h"
 #include "global.h"
+#include "main.h"
 
 // =================== TRAFFIC LIGHT 1 ===================
 void set_Traffic_1_Red(void) {
