@@ -1,4 +1,6 @@
 #include "fsm_manual.h"
+#include "traffic_light.h"
+#include "global.h"
 
 void fsm_manual_run(void) {
     switch(status) {

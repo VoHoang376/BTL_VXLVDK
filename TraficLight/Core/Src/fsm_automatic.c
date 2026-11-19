@@ -1,4 +1,6 @@
 #include "fsm_automatic.h"
+#include "traffic_light.h"
+#include "global.h"
 
 int auto_counter = 0;
 
@@ -6,7 +8,7 @@ void fsm_automatic_run(void) {
     switch(status) {
         case INIT:
             status = AUTO_RED_GREEN;
-            auto_counter = 3;
+            auto_counter = time_green;
             break;
 
         case AUTO_RED_GREEN:
@@ -16,7 +18,7 @@ void fsm_automatic_run(void) {
             auto_counter--;
             if (auto_counter <= 0) {
                 status = AUTO_RED_YELLOW;
-                auto_counter = 2;
+                auto_counter = time_yellow;
             }
 
             if (isButtonPressed(0)) {
@@ -31,10 +33,12 @@ void fsm_automatic_run(void) {
             auto_counter--;
             if (auto_counter <= 0) {
                 status = AUTO_GREEN_RED;
-                auto_counter = 3;
+                auto_counter = time_green;
             }
 
-            if (isButtonPressed(0)) status = MAN_RED_GREEN;
+            if (isButtonPressed(0)) {
+                status = MAN_RED_GREEN;
+            }
             break;
 
         case AUTO_GREEN_RED:
@@ -44,10 +48,12 @@ void fsm_automatic_run(void) {
             auto_counter--;
             if (auto_counter <= 0) {
                 status = AUTO_YELLOW_RED;
-                auto_counter = 2;
+                auto_counter = time_yellow;
             }
 
-            if (isButtonPressed(0)) status = MAN_RED_GREEN;
+            if (isButtonPressed(0)) {
+                status = MAN_RED_GREEN;
+            }
             break;
 
         case AUTO_YELLOW_RED:
@@ -57,10 +63,12 @@ void fsm_automatic_run(void) {
             auto_counter--;
             if (auto_counter <= 0) {
                 status = AUTO_RED_GREEN;
-                auto_counter = 3;
+                auto_counter = time_green;
             }
 
-            if (isButtonPressed(0)) status = MAN_RED_GREEN;
+            if (isButtonPressed(0)) {
+                status = MAN_RED_GREEN;
+            }
             break;
 
         default:

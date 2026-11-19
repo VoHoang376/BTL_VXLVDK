@@ -72,8 +72,14 @@ void Task_BlinkLED(void) {
 }
 
 void Task_FSM(void) {
-    fsm_automatic_run();
-    fsm_manual_run();
+    fsm_mode_switch();
+
+    if (mode == MODE_NORMAL) {
+        fsm_automatic_run();
+        fsm_manual_run();
+    } else {
+        fsm_tuning_run();
+    }
 }
 /* USER CODE END 0 */
 
