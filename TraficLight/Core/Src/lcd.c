@@ -1,5 +1,8 @@
 #include "lcd.h"
 #include <stdio.h>
+#include <string.h>
+#include "global.h"
+#include "dht20.h"
 
 static I2C_HandleTypeDef *lcd_i2c = NULL;
 
@@ -105,4 +108,71 @@ void lcd_print_float(float num, uint8_t decimals) {
         }
     }
     lcd_print_str(buf);
+}
+
+// Bộ nhớ đệm lưu nội dung cũ của 2 dòng để chống nhấp nháy
+static char prev_line0[17] = "";
+static char prev_line1[17] = "";
+
+void lcd_display_update_task(void) {
+    char line0[17];
+    char line1[17];
+
+    // 1. Tạo nội dung Dòng 0 dựa theo trạng thái của TV2
+    switch (status) {
+        case AUTO_RED_GREEN:
+            snprintf(line0, sizeof(line0), "AUTO R1-G2  %02ds ", auto_counter);
+            break;
+        case AUTO_RED_YELLOW:
+            snprintf(line0, sizeof(line0), "AUTO R1-Y2  %02ds ", auto_counter);
+            break;
+        case AUTO_GREEN_RED:
+            snprintf(line0, sizeof(line0), "AUTO G1-R2  %02ds ", auto_counter);
+            break;
+        case AUTO_YELLOW_RED:
+            snprintf(line0, sizeof(line0), "AUTO Y1-R2  %02ds ", auto_counter);
+            break;
+
+        case MAN_RED_GREEN:
+            snprintf(line0, sizeof(line0), "MAN  R1-G2  HOLD");
+            break;
+        case MAN_RED_YELLOW:
+            snprintf(line0, sizeof(line0), "MAN  R1-Y2  HOLD");
+            break;
+        case MAN_GREEN_RED:
+            snprintf(line0, sizeof(line0), "MAN  G1-R2  HOLD");
+            break;
+        case MAN_YELLOW_RED:
+            snprintf(line0, sizeof(line0), "MAN  Y1-R2  HOLD");
+            break;
+
+        default:
+            snprintf(line0, sizeof(line0), "SYSTEM INIT...  ");
+            break;
+    }
+
+    // 2. Tạo nội dung Dòng 1 từ dữ liệu cảm biến DHT20
+    DHT20_Data_t env = dht20_get_data();
+    if (env.is_valid) {
+        int t_int = (int)env.temperature;
+        int t_dec = (int)((env.temperature - t_int) * 10.0f + 0.5f);
+        int h_int = (int)env.humidity;
+        int h_dec = (int)((env.humidity - h_int) * 10.0f + 0.5f);
+        snprintf(line1, sizeof(line1), "T:%02d.%01dC  H:%02d.%01d%%", t_int, t_dec, h_int, h_dec);
+    } else {
+        snprintf(line1, sizeof(line1), "DHT20 Reading...");
+    }
+
+    // 3. Chỉ ghi ra LCD khi nội dung thực sự thay đổi (không dùng lcd_clear)
+    if (strcmp(line0, prev_line0) != 0) {
+        lcd_set_cursor(0, 0);
+        lcd_print_str(line0);
+        strcpy(prev_line0, line0);
+    }
+
+    if (strcmp(line1, prev_line1) != 0) {
+        lcd_set_cursor(1, 0);
+        lcd_print_str(line1);
+        strcpy(prev_line1, line1);
+    }
 }
