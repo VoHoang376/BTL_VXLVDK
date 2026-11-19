@@ -13,5 +13,6 @@
 #define MAN_YELLOW_RED 14
 
 extern int status;
+extern int auto_counter;
 
 #endif

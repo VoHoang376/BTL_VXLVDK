@@ -12,5 +12,6 @@ void lcd_set_cursor(uint8_t row, uint8_t col);
 void lcd_print_str(const char *str);
 void lcd_print_int(int32_t num);
 void lcd_print_float(float num, uint8_t decimals);
+void lcd_display_update_task(void);
 
 #endif /* INC_LCD_H_ */
