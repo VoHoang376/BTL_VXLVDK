@@ -4,7 +4,7 @@
 #include "main.h"
 #include <stdint.h>
 
-#define LCD_I2C_ADDR    (0x27 << 1)
+#define LCD_I2C_ADDR    (0x21 << 1)
 
 void lcd_init(I2C_HandleTypeDef *hi2c);
 void lcd_clear(void);
