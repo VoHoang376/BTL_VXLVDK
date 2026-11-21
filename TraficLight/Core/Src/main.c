@@ -30,6 +30,7 @@
 #include "global.h"
 #include "fsm_automatic.h"
 #include "fsm_manual.h"
+#include "fsm_tuning.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -78,9 +79,13 @@ void Task_FSM(void) {
 
     if (mode == MODE_NORMAL) {
         fsm_automatic_run();
+    } else if (mode == MODE_MANUAL) {
         fsm_manual_run();
     } else {
         fsm_tuning_run();
+    }
+}
+
 void Task_Test_Display(void) {
     DHT20_Data_t env = dht20_get_data();
 
@@ -141,13 +146,12 @@ int main(void)
     HAL_TIM_Base_Start_IT(&htim2); // Tick = 10ms
 
     // Các task của TV2 (Nút nhấn & FSM)
-    SCH_Add_Task(button_reading, 0, 1);        // Quét nút nhấn mỗi 10ms
-    SCH_Add_Task(fsm_automatic_run, 5, 5);  // FSM Auto chạy mỗi 50ms
-    SCH_Add_Task(fsm_manual_run, 5, 5);     // FSM Manual chạy mỗi 50ms
+	SCH_Add_Task(button_reading, 0, 1);   // Quét nút nhấn mỗi 10ms
+	SCH_Add_Task(Task_FSM, 5, 5);         // Chạy toàn bộ FSM (Mode + Auto + Manual + Tuning) mỗi 50ms
 
-    // Các task của TV1 (DHT20 & LCD)
-    SCH_Add_Task(dht20_read_task, 0, 10);         // Đọc cảm biến mỗi 100ms
-    SCH_Add_Task(lcd_display_update_task, 10, 10); // Cập nhật LCD mỗi 100ms
+	// Các task của TV1 (DHT20 & LCD)
+	SCH_Add_Task(dht20_read_task, 0, 10);          // Đọc cảm biến mỗi 100ms
+	SCH_Add_Task(lcd_display_update_task, 10, 10); // Cập nhật LCD mỗi 100ms
   /* USER CODE END 2 */
 
   /* Infinite loop */
