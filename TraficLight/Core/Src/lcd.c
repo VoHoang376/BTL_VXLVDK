@@ -118,32 +118,54 @@ void lcd_display_update_task(void) {
     char line0[17];
     char line1[17];
 
-    // 1. Tạo nội dung Dòng 0 dựa theo trạng thái của TV2
-    switch (status) {
-        case AUTO_RED_GREEN:
-            snprintf(line0, sizeof(line0), "AUTO R1-G2  %02ds ", auto_counter);
-            break;
-        case AUTO_RED_YELLOW:
-            snprintf(line0, sizeof(line0), "AUTO R1-Y2  %02ds ", auto_counter);
-            break;
-        case AUTO_GREEN_RED:
-            snprintf(line0, sizeof(line0), "AUTO G1-R2  %02ds ", auto_counter);
-            break;
-        case AUTO_YELLOW_RED:
-            snprintf(line0, sizeof(line0), "AUTO Y1-R2  %02ds ", auto_counter);
+    // 1. Dòng 0: Hiển thị theo Mode & thông số đang chỉnh (đủ 16 ký tự)
+    switch (mode) {
+        case MODE_NORMAL:
+            switch (status_auto) {
+                case AUTO_RED1_GREEN2:
+                    snprintf(line0, sizeof(line0), "AUTO R1-G2  %02ds ", auto_counter);
+                    break;
+                case AUTO_RED1_YELLOW2:
+                    snprintf(line0, sizeof(line0), "AUTO R1-Y2  %02ds ", auto_counter);
+                    break;
+                case AUTO_GREEN1_RED2:
+                    snprintf(line0, sizeof(line0), "AUTO G1-R2  %02ds ", auto_counter);
+                    break;
+                case AUTO_YELLOW1_RED2:
+                    snprintf(line0, sizeof(line0), "AUTO Y1-R2  %02ds ", auto_counter);
+                    break;
+                default:
+                    snprintf(line0, sizeof(line0), "AUTO STARTING...");
+                    break;
+            }
             break;
 
-        case MAN_RED_GREEN:
-            snprintf(line0, sizeof(line0), "MAN  R1-G2  HOLD");
+        case MODE_MANUAL:
+            switch (status_manual) {
+                case MAN_RED_GREEN:
+                    snprintf(line0, sizeof(line0), "MAN  R1-G2  HOLD");
+                    break;
+                case MAN_RED_YELLOW:
+                    snprintf(line0, sizeof(line0), "MAN  R1-Y2  HOLD");
+                    break;
+                case MAN_GREEN_RED:
+                    snprintf(line0, sizeof(line0), "MAN  G1-R2  HOLD");
+                    break;
+                case MAN_YELLOW_RED:
+                    snprintf(line0, sizeof(line0), "MAN  Y1-R2  HOLD");
+                    break;
+                default:
+                    snprintf(line0, sizeof(line0), "MAN  HOLD...    ");
+                    break;
+            }
             break;
-        case MAN_RED_YELLOW:
-            snprintf(line0, sizeof(line0), "MAN  R1-Y2  HOLD");
+
+        case MODE_TUNE_GREEN:
+            snprintf(line0, sizeof(line0), "TUN GRN %02d->%02ds ", temp_green, time_green);
             break;
-        case MAN_GREEN_RED:
-            snprintf(line0, sizeof(line0), "MAN  G1-R2  HOLD");
-            break;
-        case MAN_YELLOW_RED:
-            snprintf(line0, sizeof(line0), "MAN  Y1-R2  HOLD");
+
+        case MODE_TUNE_YELLOW:
+            snprintf(line0, sizeof(line0), "TUN YEL %02d->%02ds ", temp_yellow, time_yellow);
             break;
 
         default:
@@ -151,7 +173,7 @@ void lcd_display_update_task(void) {
             break;
     }
 
-    // 2. Tạo nội dung Dòng 1 từ dữ liệu cảm biến DHT20
+    // 2. Dòng 1: Nhiệt độ & độ ẩm từ DHT20
     DHT20_Data_t env = dht20_get_data();
     if (env.is_valid) {
         int t_int = (int)env.temperature;
@@ -163,7 +185,7 @@ void lcd_display_update_task(void) {
         snprintf(line1, sizeof(line1), "DHT20 Reading...");
     }
 
-    // 3. Chỉ ghi ra LCD khi nội dung thực sự thay đổi (không dùng lcd_clear)
+    // 3. Chỉ cập nhật dòng nào có nội dung thay đổi (không gọi lcd_clear)
     if (strcmp(line0, prev_line0) != 0) {
         lcd_set_cursor(0, 0);
         lcd_print_str(line0);
