@@ -69,6 +69,18 @@ static void MX_TIM2_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void Task_BlinkLED(void) {
+    HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+}
+
+void Task_FSM(void) {
+    fsm_mode_switch();
+
+    if (mode == MODE_NORMAL) {
+        fsm_automatic_run();
+        fsm_manual_run();
+    } else {
+        fsm_tuning_run();
 void Task_Test_Display(void) {
     DHT20_Data_t env = dht20_get_data();
 
