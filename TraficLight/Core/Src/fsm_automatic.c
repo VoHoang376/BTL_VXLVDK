@@ -3,12 +3,15 @@
 #include "global.h"
 
 int auto_counter = 0;
+static int tick_1s_counter = 0;
 
 void fsm_automatic_run(void) {
     switch(status) {
         case INIT:
             status = AUTO_RED_GREEN;
             auto_counter = time_green;
+            auto_counter = 3;
+            tick_1s_counter = 0;
             break;
 
         case AUTO_RED_GREEN:
@@ -19,6 +22,14 @@ void fsm_automatic_run(void) {
             if (auto_counter <= 0) {
                 status = AUTO_RED_YELLOW;
                 auto_counter = time_yellow;
+            tick_1s_counter++;
+            if (tick_1s_counter >= 20) { // 20 x 50ms = 1s
+                tick_1s_counter = 0;
+                auto_counter--;
+                if (auto_counter <= 0) {
+                    status = AUTO_RED_YELLOW;
+                    auto_counter = 2;
+                }
             }
 
             if (isButtonPressed(0)) {
@@ -34,6 +45,14 @@ void fsm_automatic_run(void) {
             if (auto_counter <= 0) {
                 status = AUTO_GREEN_RED;
                 auto_counter = time_green;
+            tick_1s_counter++;
+            if (tick_1s_counter >= 20) {
+                tick_1s_counter = 0;
+                auto_counter--;
+                if (auto_counter <= 0) {
+                    status = AUTO_GREEN_RED;
+                    auto_counter = 3;
+                }
             }
 
             if (isButtonPressed(0)) {
@@ -49,6 +68,14 @@ void fsm_automatic_run(void) {
             if (auto_counter <= 0) {
                 status = AUTO_YELLOW_RED;
                 auto_counter = time_yellow;
+            tick_1s_counter++;
+            if (tick_1s_counter >= 20) {
+                tick_1s_counter = 0;
+                auto_counter--;
+                if (auto_counter <= 0) {
+                    status = AUTO_YELLOW_RED;
+                    auto_counter = 2;
+                }
             }
 
             if (isButtonPressed(0)) {
@@ -64,6 +91,14 @@ void fsm_automatic_run(void) {
             if (auto_counter <= 0) {
                 status = AUTO_RED_GREEN;
                 auto_counter = time_green;
+            tick_1s_counter++;
+            if (tick_1s_counter >= 20) {
+                tick_1s_counter = 0;
+                auto_counter--;
+                if (auto_counter <= 0) {
+                    status = AUTO_RED_GREEN;
+                    auto_counter = 3;
+                }
             }
 
             if (isButtonPressed(0)) {

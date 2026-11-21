@@ -23,6 +23,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "scheduler.h"
+#include "dht20.h"
+#include "lcd.h"
 #include "button.h"
 #include "traffic_light.h"
 #include "global.h"
@@ -79,6 +81,21 @@ void Task_FSM(void) {
         fsm_manual_run();
     } else {
         fsm_tuning_run();
+void Task_Test_Display(void) {
+    DHT20_Data_t env = dht20_get_data();
+
+    lcd_set_cursor(0, 0);
+    lcd_print_str("CO3009 TEST OK! ");
+
+    lcd_set_cursor(1, 0);
+    if (env.is_valid) {
+        lcd_print_str("T:");
+        lcd_print_float(env.temperature, 1);
+        lcd_print_str("C H:");
+        lcd_print_float(env.humidity, 1);
+        lcd_print_str("% ");
+    } else {
+        lcd_print_str("Reading DHT20...");
     }
 }
 /* USER CODE END 0 */
@@ -115,15 +132,22 @@ int main(void)
   MX_I2C1_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
+    lcd_init(&hi2c1);
+    dht20_init(&hi2c1);
 
-  SCH_Init();
+    SCH_Init();
+    HAL_NVIC_SetPriority(TIM2_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(TIM2_IRQn);
+    HAL_TIM_Base_Start_IT(&htim2); // Tick = 10ms
 
-    SCH_Add_Task(Task_BlinkLED, 0, 100);
-    SCH_Add_Task(button_reading, 0, 1);
-    SCH_Add_Task(Task_FSM, 0, 100);
+    // Các task của TV2 (Nút nhấn & FSM)
+    SCH_Add_Task(button_reading, 0, 1);        // Quét nút nhấn mỗi 10ms
+    SCH_Add_Task(fsm_automatic_run, 5, 5);  // FSM Auto chạy mỗi 50ms
+    SCH_Add_Task(fsm_manual_run, 5, 5);     // FSM Manual chạy mỗi 50ms
 
-    HAL_TIM_Base_Start_IT(&htim2);
-
+    // Các task của TV1 (DHT20 & LCD)
+    SCH_Add_Task(dht20_read_task, 0, 10);         // Đọc cảm biến mỗi 100ms
+    SCH_Add_Task(lcd_display_update_task, 10, 10); // Cập nhật LCD mỗi 100ms
   /* USER CODE END 2 */
 
   /* Infinite loop */

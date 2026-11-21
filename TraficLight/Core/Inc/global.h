@@ -23,5 +23,7 @@ extern int status_auto;
 #define AUTO_RED1_YELLOW2 11
 #define AUTO_GREEN1_RED2  12
 #define AUTO_YELLOW1_RED2 13
+extern int status;
+extern int auto_counter;
 
 #endif

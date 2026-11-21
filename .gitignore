@@ -6,7 +6,7 @@ Release/
 *.map
 *.su
 .metadata/
-./vscode
+.vscode/
 .settings/
 *.launch
 *.cfg
